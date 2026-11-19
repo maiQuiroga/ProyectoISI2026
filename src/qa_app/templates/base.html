@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Plataforma Q&amp;A{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+    <header>
+        <a href="{{ url_for('questions.index') }}"><strong>Plataforma Q&amp;A</strong></a>
+    </header>
+
+    <nav aria-label="Navegación principal">
+        <a href="{{ url_for('questions.index') }}">Preguntas</a>
+    </nav>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>Plataforma colaborativa de preguntas y respuestas</p>
+    </footer>
+</body>
+</html>
