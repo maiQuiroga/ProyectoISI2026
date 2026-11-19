@@ -7,13 +7,10 @@ from qa_app import create_app
 def app():
     # Instanciamos la app usando la factory que creaste
     app = create_app()
-    app.config.update(
-        {
-            "TESTING": True,
-        }
-    )
+    app.config.update({
+        "TESTING": True,
+    })
     yield app
-
 
 @pytest.fixture
 def client(app):
