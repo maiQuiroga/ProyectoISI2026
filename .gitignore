@@ -3,3 +3,5 @@
 *.egg-info/
 .venv/
 .pytest_cache/
+
+qa_app.db
