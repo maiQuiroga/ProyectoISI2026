@@ -3,35 +3,29 @@ from types import SimpleNamespace
 from flask import (
     Blueprint,
     abort,
-    current_app,
+    flash,
     redirect,
     render_template,
     request,
     url_for,
 )
 from sqlalchemy import select
-from werkzeug.security import generate_password_hash
 
 from qa_app.extensions import db
-from qa_app.models import Answer, Category, HumanUser, Question, Tag
+from qa_app.models import Answer, Category, Question, RoleType, Tag
 from qa_app.services.auto_response_service import AutoResponseService
+from qa_app.web.auth import get_current_user
 
 questions_bp = Blueprint("questions", __name__)
 VALID_CATEGORIES = {"Python", "Flask", "Base de Datos", "Diseño / UML"}
 
 
-def _local_author():
-    email = current_app.config["LOCAL_AUTHOR_EMAIL"]
-    author = db.session.scalar(select(HumanUser).where(HumanUser.email == email))
-    if author is None:
-        author = HumanUser(
-            name="Usuario",
-            email=email,
-            password_hash=generate_password_hash("local-account-disabled"),
-        )
-        db.session.add(author)
-        db.session.flush()
-    return author
+def _require_login():
+    user = get_current_user()
+    if user is None:
+        flash("Inicia sesión para publicar preguntas o respuestas.", "error")
+        return None
+    return user
 
 
 def _answer_view(answer):
@@ -69,6 +63,10 @@ def index():
 
 @questions_bp.post("/questions")
 def create():
+    author = _require_login()
+    if author is None:
+        return redirect(url_for("auth.login"))
+
     title = request.form.get("title", "").strip()
     category = request.form.get("category", "").strip()
     body = request.form.get("body", "").strip()
@@ -101,7 +99,7 @@ def create():
     question = Question(
         title=title,
         body=body,
-        author=_local_author(),
+        author=author,
         category=category_model,
         tags=tag_models,
     )
@@ -130,6 +128,10 @@ def detail(question_id):
 
 @questions_bp.post("/questions/<question_id>/responses")
 def add_response(question_id):
+    author = _require_login()
+    if author is None:
+        return redirect(url_for("auth.login"))
+
     question = db.session.get(Question, question_id)
     if question is None:
         abort(404)
@@ -138,7 +140,26 @@ def add_response(question_id):
     if not body:
         abort(400, description="La respuesta no puede estar vacía.")
 
-    answer = Answer(body=body, author=_local_author(), question=question)
+    answer = Answer(body=body, author=author, question=question)
     db.session.add(answer)
     db.session.commit()
     return redirect(url_for("questions.detail", question_id=question_id))
+
+
+@questions_bp.post("/questions/<question_id>/delete")
+def delete_question(question_id):
+    user = get_current_user()
+    if user is None:
+        flash("Inicia sesión para continuar.", "error")
+        return redirect(url_for("auth.login"))
+    if user.role != RoleType.ADMIN:
+        abort(403)
+
+    question = db.session.get(Question, question_id)
+    if question is None:
+        abort(404)
+
+    db.session.delete(question)
+    db.session.commit()
+    flash("La pregunta fue eliminada.", "success")
+    return redirect(url_for("questions.index"))

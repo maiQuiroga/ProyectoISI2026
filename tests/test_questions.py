@@ -1,4 +1,16 @@
+def register_user(client):
+    return client.post(
+        "/register",
+        data={
+            "name": "Usuario de prueba",
+            "email": "qa@example.com",
+            "password": "password-segura",
+        },
+    )
+
+
 def test_question_and_answer_flow(client):
+    assert register_user(client).status_code == 302
     created = client.post(
         "/questions",
         data={
@@ -29,6 +41,7 @@ def test_question_and_answer_flow(client):
 
 
 def test_invalid_forms_and_missing_question(client):
+    assert register_user(client).status_code == 302
     assert client.post("/questions", data={}).status_code == 400
     assert client.post(
         "/questions",
@@ -49,6 +62,7 @@ def test_invalid_forms_and_missing_question(client):
 
 
 def test_ia_help_tag_creates_ai_answer(client):
+    assert register_user(client).status_code == 302
     created = client.post(
         "/questions",
         data={

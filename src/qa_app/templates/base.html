@@ -13,9 +13,21 @@
 
     <nav aria-label="Navegación principal">
         <a href="{{ url_for('questions.index') }}">Preguntas</a>
+        {% if current_user %}
+            <span>{{ current_user.name }} · {{ 'Admin' if current_user.role.value == 'Admin' else 'Usuario' }}</span>
+            <form action="{{ url_for('auth.logout') }}" method="post">
+                <button type="submit">Cerrar sesión</button>
+            </form>
+        {% else %}
+            <a href="{{ url_for('auth.login') }}">Iniciar sesión</a>
+            <a href="{{ url_for('auth.register') }}">Registrarse</a>
+        {% endif %}
     </nav>
 
     <main>
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+            <p role="status">{{ message }}</p>
+        {% endfor %}
         {% block content %}{% endblock %}
     </main>
 

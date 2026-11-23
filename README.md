@@ -38,11 +38,19 @@ Proyecto integrador de Ingeniería de Software desarrollado en Python con Flask,
 	- En el detalle, enviar una respuesta y comprobar que aparece en la página.
 	- Para probar la respuesta automática simulada, publicar una pregunta con la etiqueta `ia-help`.
 
-7. Ejecutar las pruebas (opcional):
+7. Dar el rol Admin a una cuenta:
+
+	Primero registra la cuenta desde la aplicación. Luego, en otra terminal abierta en la carpeta del proyecto, ejecuta el comando con el correo de esa cuenta:
+
+	uv run flask --app qa_app:create_app create-admin usuario@example.com
+
+	El comando promueve a Admin la cuenta que ya existe y conserva su contraseña. Si el correo todavía no está registrado, crea una cuenta nueva y solicita nombre y contraseña.
+
+8. Ejecutar las pruebas (opcional):
 
 	uv run pytest
 
-8. Revisar el estilo del código (opcional):
+9. Revisar el estilo del código (opcional):
 
 	uv run ruff check .
 

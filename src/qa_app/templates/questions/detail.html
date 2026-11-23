@@ -23,6 +23,11 @@
     <div>
         <p>{{ question.body }}</p>
     </div>
+    {% if current_user and current_user.role.value == 'Admin' %}
+    <form action="{{ url_for('questions.delete_question', question_id=question.id) }}" method="post">
+        <button type="submit">Eliminar pregunta</button>
+    </form>
+    {% endif %}
 </article>
 
 <hr>

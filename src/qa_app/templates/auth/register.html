@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Registrarse — Plataforma Q&amp;A{% endblock %}
+
+{% block content %}
+<section>
+    <h1>Crear cuenta</h1>
+    <form action="{{ url_for('auth.register') }}" method="post">
+        <div>
+            <label for="name">Nombre</label>
+            <input type="text" id="name" name="name" maxlength="100" required autocomplete="name">
+        </div>
+        <div>
+            <label for="email">Correo electrónico</label>
+            <input type="email" id="email" name="email" maxlength="120" required autocomplete="email">
+        </div>
+        <div>
+            <label for="password">Contraseña (mínimo 8 caracteres)</label>
+            <input type="password" id="password" name="password" minlength="8" required autocomplete="new-password">
+        </div>
+        <button type="submit">Registrarse</button>
+    </form>
+    <p>¿Ya tienes una cuenta? <a href="{{ url_for('auth.login') }}">Inicia sesión</a>.</p>
+</section>
+{% endblock %}
