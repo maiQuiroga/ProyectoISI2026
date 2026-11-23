@@ -1,7 +1,11 @@
 ﻿from datetime import UTC, datetime
 from typing import Any
 
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
 from qa_app.models.answer import Answer
+from qa_app.models.question import Question
 from qa_app.models.user import AiAgent
 from qa_app.services.ai_response_detector import AIResponseDetector
 from qa_app.services.ai_strategies.base import generationStrategy
@@ -81,3 +85,38 @@ class AutoResponseService:
             "is_accepted": False,
             "created_at": datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC"),
         }
+
+def process_unanswered_questions(
+    session: Session,
+    inactive_days: int = 7,
+    now: datetime | None = None,
+) -> list[Answer]:
+    """Genera respuestas de IA para preguntas sin responder que superaron el plazo."""
+    answered_ids = select(Answer.question_id)
+    unanswered = session.scalars(
+        select(Question).where(~Question.id.in_(answered_ids))
+    ).all()
+
+    if not unanswered:
+        return []
+
+    agent = session.scalar(select(AiAgent))
+    if agent is None:
+        agent = build_ai_agent()
+        session.add(agent)
+        session.flush()
+
+    detector = AIResponseDetector(inactive_days=inactive_days)
+    service = AutoResponseService(detector=detector, agent=agent)
+
+    created_answers: list[Answer] = []
+    for question in unanswered:
+        answer = service.generate_for_question(question, now=now)
+        if isinstance(answer, Answer):
+            session.add(answer)
+            created_answers.append(answer)
+
+    if created_answers:
+        session.commit()
+
+    return created_answers

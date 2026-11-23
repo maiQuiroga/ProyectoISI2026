@@ -71,5 +71,20 @@ def create_app(test_config=None):
         user.role = RoleType.ADMIN
         db.session.commit()
         click.echo(f"La cuenta {normalized_email} tiene rol Admin.")
+    @app.cli.command("process-unanswered")
+    @click.option(
+        "--days",
+        default=7,
+        show_default=True,
+        type=int,
+        help="Días mínimos sin respuesta para generar respuesta automática.",
+    )
+    def process_unanswered(days):
+        from qa_app.services.auto_response_service import (
+            process_unanswered_questions,
+        )
+
+        created = process_unanswered_questions(db.session, inactive_days=days)
+        click.echo(f"Respuestas automáticas generadas: {len(created)}")
 
     return app

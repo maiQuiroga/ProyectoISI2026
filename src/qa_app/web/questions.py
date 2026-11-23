@@ -13,7 +13,10 @@ from sqlalchemy import select
 
 from qa_app.extensions import db
 from qa_app.models import Answer, Category, Question, RoleType, Tag
-from qa_app.services.auto_response_service import AutoResponseService
+from qa_app.services.auto_response_service import (
+    AutoResponseService,
+    process_unanswered_questions,
+)
 from qa_app.web.auth import get_current_user
 
 questions_bp = Blueprint("questions", __name__)
@@ -52,6 +55,7 @@ def _question_view(question):
 
 @questions_bp.get("/")
 def index():
+    process_unanswered_questions(db.session)
     questions = db.session.scalars(
         select(Question).order_by(Question.publication_date.desc(), Question.id)
     ).all()
