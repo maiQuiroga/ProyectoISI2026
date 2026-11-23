@@ -1,6 +1,8 @@
-from datetime import date
 import uuid
-from src.qa_app.extensions import db
+from datetime import date
+
+from qa_app.extensions import db
+
 
 class Answer(db.Model):
     __tablename__ = "answer"

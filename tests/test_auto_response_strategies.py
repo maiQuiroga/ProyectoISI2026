@@ -12,9 +12,24 @@ from src.qa_app.services.auto_response_service import AIAgent, AutoResponseServi
 def test_detector_identifies_ia_help_tag_and_inactivity():
     detector = AIResponseDetector(trigger_tag="ia-help", inactive_days=7)
 
-    q_tag = {"title": "UML", "body": "Diagrama de secuencias", "tags": ["#ia-help"], "created_at": date.today()}
-    q_inactive = {"title": "SQL", "body": "Índices", "tags": ["db"], "created_at": date.today() - timedelta(days=8)}
-    q_recent = {"title": "Python", "body": "Listas", "tags": ["python"], "created_at": date.today() - timedelta(days=2)}
+    q_tag = {
+        "title": "UML",
+        "body": "Diagrama de secuencias",
+        "tags": ["#ia-help"],
+        "created_at": date.today(),
+    }
+    q_inactive = {
+        "title": "SQL",
+        "body": "Índices",
+        "tags": ["db"],
+        "created_at": date.today() - timedelta(days=8),
+    }
+    q_recent = {
+        "title": "Python",
+        "body": "Listas",
+        "tags": ["python"],
+        "created_at": date.today() - timedelta(days=2),
+    }
 
     assert detector.requires_ai_response(q_tag) is True
     assert detector.detection_reason(q_tag) == "trigger_tag"

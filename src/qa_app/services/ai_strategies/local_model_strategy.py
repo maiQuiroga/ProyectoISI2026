@@ -1,5 +1,5 @@
-from .base import generationStrategy 
-  
+from .base import generationStrategy
+
 
 class localModelStrategy(generationStrategy):
     def generate_response(self, question_text: str) -> str:

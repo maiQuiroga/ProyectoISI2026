@@ -10,15 +10,39 @@ Proyecto integrador de Ingeniería de Software desarrollado en Python con Flask,
 
 <!-- Configuración del entorno local -->
 
-1.Clonar el repositorio y entrar al directorio
+1. Descargar o clonar el repositorio y abrir una terminal dentro de la carpeta `ProyectoISI2026`.
 
-2.Sincronizar dependencias y entorno virtual: uv sync
+2. Instalar las dependencias y preparar el entorno virtual:
 
-3.Configurar variables de entorno: cp.env.example .env
+	uv sync
 
-4.Levantar la aplicacion localmente: uv run flask --app qa_app:create_app run --debug
+3. Crear las tablas de la base de datos local:
 
-(localhost:500/health)
+	uv run alembic upgrade head
 
-5.Calidad de codigo y tests: uv run ruff check .
+	La aplicación usa SQLite y crea la base en `instance/qa_app.db`. No es necesario configurar una base de datos para probarla.
+
+4. Iniciar la aplicación:
+
+	uv run flask --app qa_app:create_app run --debug
+
+5. Abrir la aplicación en el navegador:
+
+	`http://127.0.0.1:5000`
+
+	Para comprobar que el servidor está activo, abrir `http://127.0.0.1:5000/health`. Debe mostrar `{"status":"ok"}`.
+
+6. Probar el flujo Q&A:
+
+	- Publicar una pregunta y abrir su detalle desde el listado.
+	- En el detalle, enviar una respuesta y comprobar que aparece en la página.
+	- Para probar la respuesta automática simulada, publicar una pregunta con la etiqueta `ia-help`.
+
+7. Ejecutar las pruebas (opcional):
+
+	uv run pytest
+
+8. Revisar el estilo del código (opcional):
+
+	uv run ruff check .
 

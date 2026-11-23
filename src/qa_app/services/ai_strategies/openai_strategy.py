@@ -1,4 +1,4 @@
-from .base import generationStrategy 
+from .base import generationStrategy
 
 
 class openAIStrategy(generationStrategy):

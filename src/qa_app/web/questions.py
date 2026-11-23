@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from types import SimpleNamespace
 
 from flask import (
     Blueprint,
@@ -9,33 +9,61 @@ from flask import (
     request,
     url_for,
 )
+from sqlalchemy import select
+from werkzeug.security import generate_password_hash
+
+from qa_app.extensions import db
+from qa_app.models import Answer, Category, HumanUser, Question, Tag
+from qa_app.services.auto_response_service import AutoResponseService
 
 questions_bp = Blueprint("questions", __name__)
+VALID_CATEGORIES = {"Python", "Flask", "Base de Datos", "Diseño / UML"}
 
 
-def _questions_store():
-    return current_app.extensions["qa_questions"]
+def _local_author():
+    email = current_app.config["LOCAL_AUTHOR_EMAIL"]
+    author = db.session.scalar(select(HumanUser).where(HumanUser.email == email))
+    if author is None:
+        author = HumanUser(
+            name="Usuario",
+            email=email,
+            password_hash=generate_password_hash("local-account-disabled"),
+        )
+        db.session.add(author)
+        db.session.flush()
+    return author
 
 
-def _timestamp():
-    return datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
+def _answer_view(answer):
+    return SimpleNamespace(
+        author_name=answer.author.name,
+        body=answer.body,
+        is_ai=answer.author.type == "AiAgente",
+        is_accepted=answer.is_accepted,
+        created_at=answer.publication_date.strftime("%Y-%m-%d"),
+    )
 
 
-def _find_question(question_id):
-    return next(
-        (
-            question
-            for question in _questions_store()["items"]
-            if question["id"] == question_id
-        ),
-        None,
+def _question_view(question):
+    return SimpleNamespace(
+        id=question.id,
+        title=question.title,
+        category=question.category.name,
+        tags=[tag.name for tag in question.tags],
+        body=question.body,
+        created_at=question.publication_date.strftime("%Y-%m-%d"),
+        responses=[_answer_view(answer) for answer in question.answers],
     )
 
 
 @questions_bp.get("/")
 def index():
+    questions = db.session.scalars(
+        select(Question).order_by(Question.publication_date.desc(), Question.id)
+    ).all()
     return render_template(
-        "questions/index.html", questions=_questions_store()["items"]
+        "questions/index.html",
+        questions=[_question_view(question) for question in questions],
     )
 
 
@@ -48,41 +76,61 @@ def create():
         tag.strip() for tag in request.form.get("tags", "").split(",") if tag.strip()
     ]
 
-    if not title or not category or not body:
+    if not title or not body or category not in VALID_CATEGORIES:
         abort(400, description="El título, la categoría y el detalle son obligatorios.")
+    if len(title) > 200 or any(len(tag) > 50 for tag in tags):
+        abort(
+            400, description="El título o alguna etiqueta supera el límite permitido."
+        )
 
-    store = _questions_store()
-    question_id = store["next_id"]
-    store["next_id"] += 1
-    store["items"].append(
-        {
-            "id": question_id,
-            "title": title,
-            "category": category,
-            "tags": tags,
-            "body": body,
-            "created_at": _timestamp(),
-            "responses": [],
-        }
+    category_model = db.session.scalar(
+        select(Category).where(Category.name == category)
     )
-    return redirect(url_for("questions.detail", question_id=question_id))
+    if category_model is None:
+        category_model = Category(name=category)
+        db.session.add(category_model)
+
+    tag_models = []
+    for tag_name in dict.fromkeys(tag.lstrip("#") for tag in tags):
+        tag_model = db.session.scalar(select(Tag).where(Tag.name == tag_name))
+        if tag_model is None:
+            tag_model = Tag(name=tag_name)
+            db.session.add(tag_model)
+        tag_models.append(tag_model)
+
+    question = Question(
+        title=title,
+        body=body,
+        author=_local_author(),
+        category=category_model,
+        tags=tag_models,
+    )
+    db.session.add(question)
+    db.session.flush()
+
+    auto_response = AutoResponseService().generate_for_question(question)
+    if auto_response is not None:
+        db.session.add(auto_response)
+
+    db.session.commit()
+    return redirect(url_for("questions.detail", question_id=question.id))
 
 
-@questions_bp.get("/questions/<int:question_id>")
+@questions_bp.get("/questions/<question_id>")
 def detail(question_id):
-    question = _find_question(question_id)
+    question = db.session.get(Question, question_id)
     if question is None:
         abort(404)
     return render_template(
         "questions/detail.html",
-        question=question,
-        responses=question["responses"],
+        question=_question_view(question),
+        responses=[_answer_view(answer) for answer in question.answers],
     )
 
 
-@questions_bp.post("/questions/<int:question_id>/responses")
+@questions_bp.post("/questions/<question_id>/responses")
 def add_response(question_id):
-    question = _find_question(question_id)
+    question = db.session.get(Question, question_id)
     if question is None:
         abort(404)
 
@@ -90,13 +138,7 @@ def add_response(question_id):
     if not body:
         abort(400, description="La respuesta no puede estar vacía.")
 
-    question["responses"].append(
-        {
-            "author_name": "Usuario",
-            "body": body,
-            "is_ai": False,
-            "is_accepted": False,
-            "created_at": _timestamp(),
-        }
-    )
+    answer = Answer(body=body, author=_local_author(), question=question)
+    db.session.add(answer)
+    db.session.commit()
     return redirect(url_for("questions.detail", question_id=question_id))

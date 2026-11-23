@@ -1,4 +1,4 @@
-﻿from src.qa_app.services.ai_strategies.base import generationStrategy
+﻿from qa_app.services.ai_strategies.base import generationStrategy
 
 
 class openAIStrategy(generationStrategy):
@@ -6,7 +6,8 @@ class openAIStrategy(generationStrategy):
         clean_question = question_text.strip()
         return (
             f"[OpenAI simulado] Análisis para '{clean_question}': "
-            f"Revisá el planteo paso a paso, verificá las precondiciones y probá con un caso mínimo."
+            "Revisá el planteo paso a paso, verificá las precondiciones y "
+            "probá con un caso mínimo."
         )
 
 
@@ -15,7 +16,8 @@ class geminiStrategy(generationStrategy):
         clean_question = question_text.strip()
         return (
             f"[Gemini simulado] Guía para '{clean_question}': "
-            f"Dividí el problema en partes pequeñas, identificá las relaciones clave y validá el resultado."
+            "Dividí el problema en partes pequeñas, identificá las relaciones "
+            "clave y validá el resultado."
         )
 
 
@@ -24,5 +26,6 @@ class localModelStrategy(generationStrategy):
         clean_question = question_text.strip()
         return (
             f"[Modelo local simulado] Respuesta para '{clean_question}': "
-            f"Comprobá los tipos de datos, el flujo principal y los posibles casos borde."
+            "Comprobá los tipos de datos, el flujo principal y los posibles "
+            "casos borde."
         )

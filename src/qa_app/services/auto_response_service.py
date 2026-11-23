@@ -1,11 +1,11 @@
 ﻿from datetime import UTC, datetime
 from typing import Any
 
-from src.qa_app.models.answer import Answer
-from src.qa_app.models.user import AiAgent
-from src.qa_app.services.ai_strategies.base import generationStrategy
-from src.qa_app.services.ai_strategies.strategies import openAIStrategy
-from src.qa_app.services.ai_response_detector import AIResponseDetector
+from qa_app.models.answer import Answer
+from qa_app.models.user import AiAgent
+from qa_app.services.ai_response_detector import AIResponseDetector
+from qa_app.services.ai_strategies.base import generationStrategy
+from qa_app.services.ai_strategies.strategies import openAIStrategy
 
 # Alias para mantener compatibilidad con el nombre del issue (AIAgent / AiAgent)
 AIAgent = AiAgent
@@ -68,8 +68,6 @@ class AutoResponseService:
                 question_id=question.id,
                 is_accepted=False,
             )
-            if hasattr(question, "add_answer"):
-                question.add_answer(answer)
             return answer
 
         return {

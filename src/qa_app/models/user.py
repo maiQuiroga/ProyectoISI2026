@@ -1,6 +1,7 @@
-from src.qa_app.extensions import db
 import enum
 import uuid
+
+from qa_app.extensions import db
 
 
 class RoleType (enum.Enum):
@@ -12,7 +13,9 @@ class RoleType (enum.Enum):
 class Author(db.Model):
     __tablename__ = "author"
 
-    id = db.Column(db.String(36), primary_key = True, default = lambda: str (uuid.uuid4()))
+    id = db.Column(
+        db.String(36), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
     name = db.Column(db.String(100), nullable = False)
     type = db.Column(db.String(50))                       #Guarda que hijo es 
 
@@ -22,7 +25,7 @@ class Author(db.Model):
     }
 
 
-    #Method
+    #Metodo
 
     def get_name(self) -> str:
         return self.name
@@ -32,10 +35,14 @@ class HumanUser(Author):
     __tablename__ = "HumanUser"
 
 
-    id = db.Column(db.String(36), db.ForeignKey("author.id"), primary_key = True, nullable = False)
+    id = db.Column(
+        db.String(36), db.ForeignKey("author.id"), primary_key=True, nullable=False
+    )
     email = db.Column(db.String(120), unique = True, nullable = False)
     password_hash = db.Column(db.String(250), nullable = False)
-    role = db.Column(db.Enum(RoleType), nullable = False, default = RoleType.GENERAL_USER)
+    role = db.Column(
+        db.Enum(RoleType), nullable=False, default=RoleType.GENERAL_USER
+    )
 
 
     __mapper_args__ = {
