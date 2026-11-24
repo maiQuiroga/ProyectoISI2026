@@ -23,7 +23,7 @@ Proyecto integrador de Ingeniería de Software desarrollado en Python con Flask,
 	La aplicación usa SQLite y crea la base en `instance/qa_app.db`. No es necesario configurar una base de datos para probarla.
 4. Configuración de IA (Gemini)
 
-Para que las respuestas automáticas con `#ia-help` usen la API real de Gemini, copiá `.env.example` como `.env` y completá tu API Key en `GEMINI_API_KEY=`. Sin esa clave, la app funciona igual con respuestas simuladas.
+    Para que las respuestas automáticas con `#ia-help` usen la API real de Gemini, copiá `.env.example` como `.env` y completá tu API Key en `GEMINI_API_KEY=`. Sin     esa clave, la app funciona igual con respuestas simuladas.
 
 5. Iniciar la aplicación:
 
