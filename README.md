@@ -21,24 +21,28 @@ Proyecto integrador de Ingeniería de Software desarrollado en Python con Flask,
 	uv run alembic upgrade head
 
 	La aplicación usa SQLite y crea la base en `instance/qa_app.db`. No es necesario configurar una base de datos para probarla.
+4. Configuración de IA (Gemini)
 
-4. Iniciar la aplicación:
+Para que las respuestas automáticas con `#ia-help` usen la API real de Gemini, copiá `.env.example` como `.env` y completá tu API Key en `GEMINI_API_KEY=`. Sin esa clave, la app funciona igual con respuestas simuladas.
+
+5. Iniciar la aplicación:
 
 	uv run flask --app qa_app:create_app run --debug
 
-5. Abrir la aplicación en el navegador:
+6. Abrir la aplicación en el navegador:
 
 	`http://127.0.0.1:5000`
 
 	Para comprobar que el servidor está activo, abrir `http://127.0.0.1:5000/health`. Debe mostrar `{"status":"ok"}`.
 
-6. Probar el flujo Q&A:
+
+7. Probar el flujo Q&A:
 
 	- Publicar una pregunta y abrir su detalle desde el listado.
 	- En el detalle, enviar una respuesta y comprobar que aparece en la página.
 	- Para probar la respuesta automática simulada, publicar una pregunta con la etiqueta `ia-help`.
 
-7. Dar el rol Admin a una cuenta:
+8. Dar el rol Admin a una cuenta:
 
 	Primero registra la cuenta desde la aplicación. Luego, en otra terminal abierta en la carpeta del proyecto, ejecuta el comando con el correo de esa cuenta:
 
@@ -46,11 +50,11 @@ Proyecto integrador de Ingeniería de Software desarrollado en Python con Flask,
 
 	El comando promueve a Admin la cuenta que ya existe y conserva su contraseña. Si el correo todavía no está registrado, crea una cuenta nueva y solicita nombre y contraseña.
 
-8. Ejecutar las pruebas (opcional):
+9. Ejecutar las pruebas (opcional):
 
 	uv run pytest
 
-9. Revisar el estilo del código (opcional):
+10. Revisar el estilo del código (opcional):
 
 	uv run ruff check .
 
