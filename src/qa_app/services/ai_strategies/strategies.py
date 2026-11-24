@@ -3,19 +3,27 @@ import os
 
 from dotenv import load_dotenv
 from google import genai
+from openai import OpenAI
 
 from qa_app.services.ai_strategies.base import generationStrategy
 
 load_dotenv()
 
-class openAIStrategy(generationStrategy):
-    def generate_response(self, question_text: str) -> str:
-        clean_question = question_text.strip()
-        return (
-            f"[OpenAI simulado] Análisis para '{clean_question}': "
-            "Revisá el planteo paso a paso, verificá las precondiciones y "
-            "probá con un caso mínimo."
+class openAIStrategy(generationStrategy):           # No ofrece capa gratuita
+    def generate_response(self, prompt: str) -> str:
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            return (
+                f"[OpenAI simulado] Análisis para '{prompt}': "
+                "Revisá el planteo paso a paso, verificá las precondiciones y "
+                "probá con un caso mínimo."
+             )
+        client = OpenAI(api_key=api_key)
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
         )
+        return response.choices[0].message.content or ""
 
 
 class geminiStrategy(generationStrategy):
