@@ -13,6 +13,7 @@ from sqlalchemy import select
 
 from qa_app.extensions import db
 from qa_app.models import Answer, Category, Question, RoleType, Tag
+from qa_app.services.ai_strategies import geminiStrategy
 from qa_app.services.auto_response_service import (
     AutoResponseService,
     process_unanswered_questions,
@@ -110,7 +111,8 @@ def create():
     db.session.add(question)
     db.session.flush()
 
-    auto_response = AutoResponseService().generate_for_question(question)
+    service = AutoResponseService(strategy=geminiStrategy())
+    auto_response = service.generate_for_question(question)  
     if auto_response is not None:
         db.session.add(auto_response)
 

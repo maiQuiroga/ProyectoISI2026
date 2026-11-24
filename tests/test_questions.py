@@ -61,7 +61,8 @@ def test_invalid_forms_and_missing_question(client):
     ).status_code == 400
 
 
-def test_ia_help_tag_creates_ai_answer(client):
+def test_ia_help_tag_creates_ai_answer(client,monkeypatch):
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     assert register_user(client).status_code == 302
     created = client.post(
         "/questions",
@@ -77,4 +78,4 @@ def test_ia_help_tag_creates_ai_answer(client):
     detail = client.get(created.headers["Location"])
     assert detail.status_code == 200
     assert b"[Agente IA]" in detail.data
-    assert b"OpenAI simulado" in detail.data
+    assert b"Gemini simulado" in detail.data

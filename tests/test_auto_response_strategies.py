@@ -41,7 +41,8 @@ def test_detector_identifies_ia_help_tag_and_inactivity():
     assert detector.detection_reason(q_recent) is None
 
 
-def test_dynamic_strategy_switching_and_ai_agent_attribution():
+def test_dynamic_strategy_switching_and_ai_agent_attribution(monkeypatch):
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     agent = AIAgent(name="Asistente ISI", provider="OpenAI", version="1.0")
     service = AutoResponseService(strategy=openAIStrategy(), agent=agent)
 

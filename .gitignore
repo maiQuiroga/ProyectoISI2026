@@ -7,3 +7,5 @@ __pycache__/
 .pytest_cache/
 
 qa_app.db
+.env
+.env
